@@ -6,9 +6,6 @@
 
 namespace Setup {
 
-  // Public API defined at bottom 
-  void initializeApplication();
-
   namespace {
     enum class SetupStatus {
       Uninitialized,
@@ -32,7 +29,7 @@ namespace Setup {
       std::exit(1);
       }
 
-      return std::filesystem::path(home);
+      return { home };
     }
 
     SetupStatus getSetupStatus() {
