@@ -14,7 +14,7 @@ namespace Setup {
     };
 
     bool validOS () {
-      #if defined (__APPLE__) || defined (__LINUX__) 
+      #if defined (__APPLE__) || defined (__linux__) 
         return true;
       #else
         return false;
