@@ -2,7 +2,7 @@
 
 int main() {
   
-  Setup::initializeApplication();
+  initializeApplication();
   
   return 0;
 }
