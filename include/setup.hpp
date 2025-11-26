@@ -1,5 +1,7 @@
 #pragma once
 
-namespace Setup {
-  void initializeApplication();
+void initializeApplication();
+
+namespace database {
+  void createDb();
 }
