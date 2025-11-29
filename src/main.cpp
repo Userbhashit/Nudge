@@ -7,10 +7,8 @@ int main(int argc, char* argv[]) {
   initializeApplication();
 
   // Get command and description.
-  std::string description("");
-  Flag command = getFlag(argc, argv, description);
-  executeFlag(command, description);
-
+  ParsedCommand pc = parseCommand(argc, argv);
+  executeCommand(pc);
 
   return 0;
 }

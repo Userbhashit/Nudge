@@ -15,8 +15,14 @@ enum class Flag {
   ERROR,
 };
 
+struct ParsedCommand {
+  Flag flag;
+  std::string description;
+};
+
 void lower(std::string& str);
-Flag getFlag(int argc, char* argv[], std::string& description);
-void executeFlag(Flag command, std::string& description);
+std::string joinArguments(int argc, char* argv[]);
+ParsedCommand parseCommand(int argc, char* argv[]);
+void executeCommand(const ParsedCommand& command);
 
 
