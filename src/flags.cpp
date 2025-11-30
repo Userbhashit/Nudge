@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "flags.hpp"
+#include "database.hpp"
 
 void lower(std::string& str) {
   std::transform(str.begin(), str.end(), str.begin(),
@@ -42,32 +43,43 @@ ParsedCommand parseCommand(int argc, char* argv[]) {
 
     auto it = lookup.find(cmd);
     if (it != lookup.end()) {
-        std::string desc = joinArguments(argc, argv, 2);
-        return {it->second, desc};
+      std::string desc = joinArguments(argc, argv, 2);
+      return {it->second, desc};
     }
 
     return {Flag::ERROR, ""};
 }
 
 void executeCommand(const ParsedCommand& pc) {
-    switch (pc.flag) {
-        case Flag::SHOW_COMPLETE:
-            std::println("Showing completed tasks...");
-            break;
-        case Flag::LIST_ALL:
-            std::println("Listing all tasks...");
-            break;
-        case Flag::DEL:
-            std::println("Deleting: {}", pc.description);
-            break;
-        case Flag::ADD:
-            std::println("Adding: {}", pc.description);
-            break;
-        case Flag::COMPLETE:
-            std::println("Marking complete: {}", pc.description);
-            break;
-        case Flag::ERROR:
-            std::println(stderr, "Unknown command.");
-            break;
-    }
+  switch (pc.flag) {
+    case Flag::SHOW_COMPLETE:
+      std::println("OK");
+      break;
+    case Flag::LIST_ALL:
+      std::println("Listing all tasks...");
+      if (!database::listAllCommands(pc)) {
+        std::println(stderr, "Failed to list tasks.");
+      }
+      break;
+    case Flag::DEL:
+      if (database::deleteTask(pc)) {
+        std::println("Successfully deleted task.");
+      } else {
+        std::println(stderr, "Deletion failed.");
+      }
+      break;
+    case Flag::ADD:
+      if (database::addTask(pc)) {
+        std::println("Task: \"{}\" was added.", pc.description);
+      } else {
+        std::println(stderr, "Failed to add task.");
+      }
+      break;
+    case Flag::COMPLETE:
+      std::println("Marking complete: {}", pc.description);
+      break;
+    case Flag::ERROR:
+      std::println(stderr, "Unknown command.");
+      break;
+  }
 }
