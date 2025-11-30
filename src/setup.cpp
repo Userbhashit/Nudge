@@ -40,10 +40,10 @@ namespace {
     switch (setupStatus) {
       case SetupStatus::Uninitialized :
         std::filesystem::create_directory(Paths::configDirectoryPath);
-        database::createDb();
+        database::openDatabase();
         break;
       case SetupStatus::DbAbsent:
-        database::createDb();
+        database::openDatabase();
         break;
       default:
         break;
