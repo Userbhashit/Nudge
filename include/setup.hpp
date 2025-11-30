@@ -2,6 +2,3 @@
 
 void initializeApplication();
 
-namespace database {
-  void createDb();
-}
