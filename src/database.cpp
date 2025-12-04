@@ -482,4 +482,29 @@ namespace database {
     bool okCompleted = listAllCompletedCommands(ParsedCommand{Flag::SHOW_COMPLETE_TASKS, ""});
     return okPending && okCompleted;
   }
+
+  int countPendingTasks() {
+    try {
+      auto db = openDatabase();
+      sqlite3_stmt* raw_stmt = nullptr;
+      const char* query = "SELECT COUNT(*) FROM tasks WHERE status = 'pending';";
+      int rc = sqlite3_prepare_v2(db.get(), query, -1, &raw_stmt, nullptr);
+      if (rc != SQLITE_OK) {
+        throw DatabaseException(std::format("Failed to prepare count statement: {}", sqlite3_errmsg(db.get())));
+      }
+      StatementPtr stmt(raw_stmt);
+      rc = sqlite3_step(stmt.get());
+      if (rc == SQLITE_ROW) {
+        int cnt = sqlite3_column_int(stmt.get(), 0);
+        return cnt;
+      }
+      return 0;
+    } catch (const DatabaseException& e) {
+      std::println(stderr, "DB Error counting pending tasks: {}", e.what());
+      return 0;
+    } catch (const std::exception& e) {
+      std::println(stderr, "General Error in countPendingTasks: {}", e.what());
+      return 0;
+    }
+  }
 } // Database

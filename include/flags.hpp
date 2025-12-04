@@ -14,6 +14,7 @@ enum class Flag {
   LIST_PENDING,  // default: show pending tasks
   MARK_COMPLETE,
   SHOW_COMPLETE_TASKS,
+  NOTIFY,        // notification users
   ERROR,
 };
 

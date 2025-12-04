@@ -3,6 +3,8 @@
 #include <string>
 #include <algorithm>
 #include <unordered_map>
+#include <cstdlib>
+#include <format>
 
 #include "flags.hpp"
 #include "database.hpp"
@@ -44,6 +46,8 @@ ParsedCommand parseCommand(int argc, char* argv[]) {
         {"delete", Flag::DEL},
       {"complete", Flag::COMPLETE},
       {"comeplete", Flag::COMPLETE},
+      {"notification", Flag::NOTIFY},
+      {"notify", Flag::NOTIFY},
     };
 
     auto it = lookup.find(cmd);
@@ -101,6 +105,32 @@ void executeCommand(const ParsedCommand& pc) {
         std::println(stderr, "Failed to mark task as complete.");
       }
       } break;
+    case Flag::NOTIFY: {
+      int pending = database::countPendingTasks();
+      std::string msg;
+      if (pending <= 0) {
+        msg = "All done for today ;)";
+      } else {
+        msg = std::format("{} left for today", pending);
+      }
+
+#if defined(__APPLE__)
+      // Escape double quotes in message for AppleScript
+      std::string safe = msg;
+      size_t pos = 0;
+      while ((pos = safe.find('"', pos)) != std::string::npos) {
+        safe.replace(pos, 1, "\\\"");
+        pos += 2;
+      }
+      std::string cmd = std::format("osascript -e 'display notification \"{}\" with title \"Nudge\"'", safe);
+      std::system(cmd.c_str());
+#elif defined(__linux__)
+      std::string cmd = std::format("notify-send \"Nudge\" \"{}\"", msg);
+      std::system(cmd.c_str());
+#else
+      std::println("{}", msg);
+#endif
+    } break;
     case Flag::ERROR:
       std::println(stderr, "Unknown command.");
       break;

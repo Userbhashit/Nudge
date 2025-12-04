@@ -54,6 +54,12 @@ How pattern completion works
 2. Run: `./build/Nudge complete "task"`.
 3. Result: Any task containing `task` (like `Read task docs`) is moved to `completed` and deleted from `tasks`.
 
+- Show a desktop notification with pending task count (macOS and Linux only):
+```bash
+./build/Nudge notification users
+```
+On macOS, uses `osascript` for native notifications. On Linux, uses `notify-send` (requires libnotify-bin). Falls back to console output on other platforms or if notification tools are unavailable.
+
 
 Notes
 - The application stores timestamps using the device's local timezone (SQLite stores timestamps with the `datetime('now','localtime')` expression).

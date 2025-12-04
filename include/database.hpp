@@ -71,4 +71,5 @@ namespace database {
   bool listAllBoth();
   bool markTaskComplete(const ParsedCommand& pc);
   bool listAllCompletedCommands(const ParsedCommand& pc);
+  int countPendingTasks();
 } // Database
