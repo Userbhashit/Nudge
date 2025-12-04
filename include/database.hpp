@@ -35,25 +35,31 @@ class DatabaseException : public std::runtime_error {
 };
 
 namespace Queries {
+  // Use local device time for timestamps by using SQLite's 'localtime' modifier.
+  // SQLite's CURRENT_TIMESTAMP is UTC; using datetime('now','localtime') stores local time.
   inline constexpr std::string_view TODO_TABLE_QUERY = R"(
         CREATE TABLE IF NOT EXISTS tasks(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         task TEXT NOT NULL,
         status TEXT DEFAULT 'pending', 
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
+        created_at DATETIME DEFAULT (datetime('now','localtime')));
     )";
 
   inline constexpr std::string_view COMPLETED_TABLE_QUERY = R"(
         CREATE TABLE IF NOT EXISTS completed (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         task TEXT NOT NULL,
-        completed_at DATETIME DEFAULT CURRENT_TIMESTAMP);
+        completed_at DATETIME DEFAULT (datetime('now','localtime')));
     )";
 
   inline constexpr std::string_view INSERT_TASK_QUERY = "INSERT INTO tasks (task, status) VALUES (?, 'pending');";
   inline constexpr std::string_view DELETE_TASK_QUERY = "DELETE FROM tasks WHERE id = ?;";
 
   inline constexpr std::string_view SELECT_ALL_TASKS_QUERY = "SELECT id, task, status, created_at FROM tasks ORDER BY created_at DESC;";
+  inline constexpr std::string_view SELECT_COMPLETED_TASK_QUERY = "SELECT task, completed_at FROM completed ORDER BY completed_at DESC;";
+  inline constexpr std::string_view SELECT_TASK_BY_ID_QUERY = "SELECT task FROM tasks WHERE id = ?;";
+  inline constexpr std::string_view INSERT_COMPLETED_TASK_QUERY = "INSERT INTO completed (task) VALUES (?);";
+  inline constexpr std::string_view BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION;";
 } // Queries
 
 namespace database {
@@ -61,5 +67,8 @@ namespace database {
   void setupTables(); 
   bool addTask(const ParsedCommand& pc);
   bool deleteTask(const ParsedCommand& pc);
-  bool listAllCommands(const ParsedCommand& pc);
+  bool listAllTasks();
+  bool listAllBoth();
+  bool markTaskComplete(const ParsedCommand& pc);
+  bool listAllCompletedCommands(const ParsedCommand& pc);
 } // Database

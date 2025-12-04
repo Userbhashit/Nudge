@@ -31,14 +31,19 @@ ParsedCommand parseCommand(int argc, char* argv[]) {
     lower(cmd);
 
     if (cmd == "list") {
-        bool showCompleted = (argc >= 3 && std::string(argv[2]) == "-c");
-        return {showCompleted ? Flag::SHOW_COMPLETE : Flag::LIST_ALL, ""};
+      if (argc >= 3) {
+        std::string opt = argv[2];
+        if (opt == "-c") return {Flag::SHOW_COMPLETE_TASKS, ""};
+        if (opt == "-a") return {Flag::LIST_ALL, ""};
+      }
+      return {Flag::LIST_PENDING, ""};
     }
 
     static const std::unordered_map<std::string, Flag> lookup = {
         {"add", Flag::ADD},
         {"delete", Flag::DEL},
-        {"complete", Flag::COMPLETE},
+      {"complete", Flag::COMPLETE},
+      {"comeplete", Flag::COMPLETE},
     };
 
     auto it = lookup.find(cmd);
@@ -52,13 +57,22 @@ ParsedCommand parseCommand(int argc, char* argv[]) {
 
 void executeCommand(const ParsedCommand& pc) {
   switch (pc.flag) {
-    case Flag::SHOW_COMPLETE:
-      std::println("OK");
+    case Flag::SHOW_COMPLETE_TASKS:
+      std::println("Completed tasks:");
+      if(!database::listAllCompletedCommands(pc)) {
+        std::println(stderr, "Failed to list completed tasks");
+      }
       break;
     case Flag::LIST_ALL:
-      std::println("Listing all tasks...");
-      if (!database::listAllCommands(pc)) {
-        std::println(stderr, "Failed to list tasks.");
+      std::println("Listing all tasks (pending + completed):");
+      if (!database::listAllBoth()) {
+        std::println(stderr, "Failed to list all tasks.");
+      }
+      break;
+    case Flag::LIST_PENDING:
+      std::println("Pending tasks:");
+      if (!database::listAllTasks()) {
+        std::println(stderr, "Failed to list pending tasks.");
       }
       break;
     case Flag::DEL:
@@ -75,9 +89,18 @@ void executeCommand(const ParsedCommand& pc) {
         std::println(stderr, "Failed to add task.");
       }
       break;
-    case Flag::COMPLETE:
-      std::println("Marking complete: {}", pc.description);
-      break;
+    case Flag::MARK_COMPLETE:
+    case Flag::COMPLETE: {
+      if (database::markTaskComplete(pc)) {
+        if (pc.description.empty()) {
+          std::println("Marked first pending task as complete.");
+        } else {
+          std::println("Task '{}' marked as complete.", pc.description);
+        }
+      } else {
+        std::println(stderr, "Failed to mark task as complete.");
+      }
+      } break;
     case Flag::ERROR:
       std::println(stderr, "Unknown command.");
       break;

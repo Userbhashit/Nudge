@@ -9,9 +9,11 @@
 enum class Flag {
   ADD,
   DEL,
-  LIST_ALL,
   COMPLETE,
-  SHOW_COMPLETE,
+  LIST_ALL,      // -a : show all (pending + completed)
+  LIST_PENDING,  // default: show pending tasks
+  MARK_COMPLETE,
+  SHOW_COMPLETE_TASKS,
   ERROR,
 };
 
@@ -21,7 +23,7 @@ struct ParsedCommand {
 };
 
 void lower(std::string& str);
-std::string joinArguments(int argc, char* argv[]);
+std::string joinArguments(int argc, char* argv[], int startIndex);
 ParsedCommand parseCommand(int argc, char* argv[]);
 void executeCommand(const ParsedCommand& command);
 
